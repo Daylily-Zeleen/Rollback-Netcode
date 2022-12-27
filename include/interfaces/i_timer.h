@@ -11,7 +11,6 @@
 
 #include <core/event.h>
 #include <interfaces/base/i_base.h>
-#include <def.h>
 #include <functional>
 
 namespace rollback_netcode {

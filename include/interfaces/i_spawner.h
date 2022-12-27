@@ -1,5 +1,6 @@
-﻿#pragma onces
-#include "utils.h"
+﻿#pragma once
+
+#include "../utils.h"
 
 #include "i_spawnable.h"
 

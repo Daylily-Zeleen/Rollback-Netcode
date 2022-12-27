@@ -7,14 +7,15 @@
  * @Description  :
  * Copyright (c) 2022 by Daylily-Zeleen email: daylily-zeleen@foxmail.com, All Rights Reserved.
  */
-#pragma once
+#ifndef DEF_H
+#define DEF_H
 
+#include "../thirdparty/jsonxx/jsonxx.h"
 #include "debug/debug.h"
-#include <thirdparty/jsonxx/jsonxx.h>
-#include <chrono>
 #include <string>
 
 namespace rollback_netcode {
+
 // Should always inline no matter what.
 #ifndef ALWAYS_INLINE_
 #if defined(__GNUC__)
@@ -40,19 +41,23 @@ using JsonArr = jsonxx::Array;
 using JsonStr = jsonxx::String;
 using JsonNumber = jsonxx::Number;
 
-#define memnew(mclass) new mclass
-#define memdelete(mptr) delete mptr
+#define MEMNEW(mclass) new mclass
+#define MEMDELETE(mptr) delete mptr
 
 // 可能以字符串作为id
-using PeerId_t = uint32_t;
+using PeerId_t = int32_t;
 using UUID_t = int64_t; // 代替 NodePath
 using Hash_t = uint32_t;
 using Tick_t = int32_t;
 using SoundIdentifier_t = std::string;
 
-std::string default_uuid_to_text(const UUID_t &p_uuid) { return std::to_string(p_uuid); }
-std::string (*uuid_to_text_func)(const UUID_t &) = &default_uuid_to_text;
+#define uuid_to_text(p_uuid) std::to_string(p_uuid)
 
-std::string uuid_to_text(const UUID_t &p_uuid) { return (*uuid_to_text_func)(p_uuid); }
+// std::string default_uuid_to_text(const UUID_t &p_uuid) { return std::to_string(p_uuid); }
+// std::string (*uuid_to_text_func)(const UUID_t &) = &default_uuid_to_text;
 
-} //namespace rollback_netcode
+// std::string uuid_to_text(const UUID_t &p_uuid) { return (*uuid_to_text_func)(p_uuid); }
+
+} // namespace rollback_netcode
+
+#endif

@@ -9,32 +9,36 @@
  */
 #pragma once
 
+#include "interfaces/i_data.h"
 #include "interfaces/base/i_base.h"
-#include <interfaces/i_input.h>
-#include <def.h>
 
 namespace rollback_netcode {
 class INetwokProcessable : public virtual ISyncObject {
 public:
-	virtual void network_preprocess(const SharedPtr<const IInput> &input) = 0;
-	virtual void network_process(const SharedPtr<const IInput> &input) = 0;
-	virtual void network_postprocess(const SharedPtr<const IInput> &input) = 0;
-    virtual PeerId_t get_network_master_peer_id() const = 0;
+    virtual void network_preprocess(const SharedPtr<const IData> &input) = 0;
+    virtual void network_process(const SharedPtr<const IData> &input) = 0;
+    virtual void network_postprocess(const SharedPtr<const IData> &input) = 0;
 
-	/**
-	 * @brief You must call this method after you setup this object,
-	 * 		  So that can be process by the rollback network.
-	 */
-	void start_network_process();
+    virtual PeerId_t get_network_master_peer_id() const { return -1; }
+    virtual void network_preprocess_without_input() {}
+    virtual void network_process_without_input() {}
+    virtual void network_postprocess_without_input() {}
 
-	/**
-	 * @brief You should call this method to stop process by rollback network.
-	 * At most time, you should stop process by rollback network when this object despawn.
-	 */
-	void stop_network_process();
+    /**
+     * @brief You must call this method after you setup this object,
+     * 		  So that can be process by the rollback network.
+     */
+    void enable_network_process();
 
-	virtual ~INetwokProcessable() { stop_network_process(); }
+    /**
+     * @brief You should call this method to stop process by rollback network.
+     * At most time, you should stop process by rollback network when this object despawn.
+     */
+    void disable_network_process();
+
+    virtual ~INetwokProcessable() { disable_network_process(); }
+
 private:
-	bool _network_process_started = false;
+    bool _network_process_started = false;
 };
 } // namespace rollback_netcode

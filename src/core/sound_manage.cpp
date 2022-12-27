@@ -1,5 +1,4 @@
-﻿#include "thirdparty/jsonxx/jsonxx.h"
-#include <interfaces/i_sync_manager.h>
+﻿#include <interfaces/i_sync_manager.h>
 #include <core/sound_manager.h>
 #include <sys/stat.h>
 #include <algorithm>

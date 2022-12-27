@@ -7,12 +7,12 @@
  * @Description  :
  * Copyright (c) 2022 by Daylily-Zeleen email: daylily-zeleen@foxmail.com, All Rights Reserved.
  */
+#include "interfaces/i_sync_manager.h"
 #include <core/input_buffer_frame.h>
-#include <thirdparty/jsonxx/jsonxx.h>
 
 namespace rollback_netcode {
 
-SharedPtr<const IInput> InputBufferFrame::get_peer_input(const PeerId_t p_peer_id) const {
+SharedPtr<const IData> InputBufferFrame::get_peer_input(const PeerId_t p_peer_id) const {
 	auto it = peers_input.find(p_peer_id);
 	return (it != peers_input.end()) ? (it->second.input) : nullptr;
 }
@@ -38,7 +38,7 @@ std::vector<PeerId_t> InputBufferFrame::get_missing_peers(const std::map<PeerId_
 	return ret;
 }
 
-void InputBufferFrame::add_peer_input(const PeerId_t p_peer_id, const SharedPtr<const IInput> &p_input, const bool p_predict) {
+void InputBufferFrame::add_peer_input(const PeerId_t p_peer_id, const SharedPtr<const IData> &p_input, const bool p_predict) {
 	peers_input.emplace(p_peer_id, PeerInput(p_input, p_predict));
 }
 
@@ -61,13 +61,13 @@ JsonObj InputBufferFrame::to_json_obj() const {
 		const PeerInput peer_input = kv.second;
 
 		JsonObj peer_input_json("predict", peer_input.predicted);
-		peer_input_json << "input" << peer_input.input->to_json_obj();
+		peer_input_json << std::string("input") << peer_input.input->to_json_obj();
 
 		peers_input_json << peer_id << peer_input_json;
 	}
 
-	input_frame_json << "tick" << tick;
-	input_frame_json << "peers_input" << peers_input_json;
+	input_frame_json << std::string("tick") << tick;
+	input_frame_json << std::string("peers_input") << peers_input_json;
 
 	return input_frame_json;
 }

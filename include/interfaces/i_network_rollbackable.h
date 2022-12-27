@@ -9,17 +9,16 @@
  */
 #pragma once
 
+#include "interfaces/i_data.h"
 #include <interfaces/base/i_base.h>
-#include <interfaces/i_state.h>
-#include <def.h>
 
 namespace rollback_netcode {
 
 class INetworkRollbackable : public virtual ISyncObject {
 public:
-	virtual SharedPtr<const IState> save_state() = 0;
-	virtual void load_state(const SharedPtr<const IState> &p_state) = 0;
-	virtual void interpolate_state(const SharedPtr<const IState> &p_old_state, const SharedPtr<const IState> &p_new_state, const float weight) = 0;
+	virtual SharedPtr<const IData> save_state() = 0;
+	virtual void load_state(const SharedPtr<const IData> &p_state) = 0;
+	virtual void interpolate_state(const SharedPtr<const IData> &p_old_state, const SharedPtr<const IData> &p_new_state, const float weight) = 0;
 
 	/**
 	 * @brief You must call this method after you setup this object,

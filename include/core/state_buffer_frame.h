@@ -10,10 +10,8 @@
 
 #pragma once
 
-#include <interfaces/i_state.h>
-#include <def.h>
-#include <thirdparty/hashfuncs.h>
-#include <thirdparty/jsonxx/jsonxx.h>
+#include "interfaces/i_data.h"
+#include <hashfuncs.h>
 
 #include <memory>
 #include <utility>
@@ -22,28 +20,13 @@ namespace rollback_netcode {
 
 struct StateBufferFrame {
 	Tick_t tick;
-	const std::map<UUID_t, SharedPtr<const IState>> data;
+	std::map<UUID_t, SharedPtr<const IData>> data;
 
-	StateBufferFrame(const Tick_t p_tick, std ::map<UUID_t, SharedPtr<const IState>> p_data) :
+	StateBufferFrame(const Tick_t p_tick, std ::map<UUID_t, SharedPtr<const IData>> &p_data) :
 			tick(p_tick), data(std::move(p_data)) {}
 
-	[[nodiscard]] Hash_t get_data_hash() const {
-		Hash_t h = hash_murmur3_one_32(10);
-		for (auto &kv : data) {
-			h = hash_murmur3_one_32(kv.first, h);
-			h = hash_murmur3_one_32(kv.second->get_hash(), h);
-		}
-		return hash_fmix32(h);
-	}
+	[[nodiscard]] Hash_t get_data_hash() const ;
 
-	[[nodiscard]] JsonObj to_json_obj() const {
-		JsonObj ret, data_json;
-		for (auto &kv : data) {
-			data_json << uuid_to_text(kv.first) << kv.second->to_json_obj();
-		}
-		ret << "tick" << tick;
-		ret << "data" << data_json;
-		return ret;
-	}
+	[[nodiscard]] JsonObj to_json_obj() const;
 };
 } // namespace rollback_netcode

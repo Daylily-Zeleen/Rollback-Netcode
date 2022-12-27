@@ -4,8 +4,8 @@
 // Contributors:
 //   Sean Middleditch <sean@middleditch.us>
 //   rlyeh <https://github.com/r-lyeh>
-
-#pragma once
+#ifndef JSONXX_H
+#define JSONXX_H
 
 #include <cassert>
 #include <cstddef>
@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 
+#include <concepts>
 // jsonxx versioning: major.minor-extra where
 // major = { number }
 // minor = { number }
@@ -115,23 +116,23 @@ public:
     Object();
     ~Object();
 
-    template <typename T> bool has(const std::string &key) const;
+    template <typename T> inline bool has(const std::string &key) const;
 
     // Always call has<>() first. If the key doesn't exist, consider
     // the behavior undefined.
-    template <typename T> T &get(const std::string &key);
-    template <typename T> const T &get(const std::string &key) const;
+    template <typename T> inline T &get(const std::string &key);
+    template <typename T> inline const T &get(const std::string &key) const;
 
-    template <typename T> const T &get(const std::string &key, const typename identity<T>::type &default_value) const;
+    template <typename T> inline const T &get(const std::string &key, const typename identity<T>::type &default_value) const;
 
-    bool has(const std::string &key) const {
+    inline bool has(const std::string &key) const {
         container::const_iterator it(value_map_.find(key));
         return it != value_map_.end();
     }
-    
-    const Value get(const std::string &key) const;
 
-    void erase(const std::string &key);
+    inline const Value get(const std::string &key) const;
+
+    inline void erase(const std::string &key);
     void clear() { reset(); }
 
     size_t size() const;
@@ -155,6 +156,9 @@ public:
     Object(const std::string &key, const Value &value);
     template <size_t N> Object(const char (&key)[N], const Value &value) { import(key, value); }
     template <typename T> Object &operator<<(const T &value);
+    template <typename T>
+        requires std::convertible_to<T, Number>
+    Object &operator<<(const T &value);
 
     Object duplicate() const;
 
@@ -172,15 +176,15 @@ public:
     size_t size() const;
     bool empty() const;
 
-    template <typename T> bool has(unsigned int i) const;
+    template <typename T> inline bool has(unsigned int i) const;
 
-    template <typename T> T &get(unsigned int i);
-    template <typename T> const T &get(unsigned int i) const;
+    template <typename T> inline T &get(unsigned int i);
+    template <typename T> inline const T &get(unsigned int i) const;
 
-    template <typename T> const T &get(unsigned int i, const typename identity<T>::type &default_value) const;
+    template <typename T> inline const T &get(unsigned int i, const typename identity<T>::type &default_value) const;
 
-    bool has(const unsigned int i) const { return i < size(); }
-    const Value get(const unsigned int i) const;
+    bool inline has(const unsigned int i) const { return i < size(); }
+    const inline Value get(const unsigned int i) const;
 
     const std::vector<Value *> &values() const { return values_; }
     std::string json() const;
@@ -228,17 +232,24 @@ public:
         type_ = BOOL_;
         bool_value_ = b;
     }
-#define $number(TYPE)                                                                                                                                                                                  \
-    void import(const TYPE &n) {                                                                                                                                                                       \
-        reset();                                                                                                                                                                                       \
-        type_ = NUMBER_;                                                                                                                                                                               \
-        number_value_ = static_cast<long double>(n);                                                                                                                                                   \
+    template <typename TNumber>
+        requires std::convertible_to<TNumber, Number>
+    void import(const TNumber &n) {
+        reset();
+        type_ = NUMBER_;
+        number_value_ = static_cast<long double>(n);
     }
-    $number(char) $number(int) $number(long) $number(long long) $number(unsigned char) $number(unsigned int) $number(unsigned long) $number(unsigned long long) $number(float) $number(double)
-        $number(long double)
-#undef $number
+// #define $number(TYPE)                                                                                                                                                                                  \
+//     void import(const TYPE &n) {                                                                                                                                                                       \
+//         reset();                                                                                                                                                                                       \
+//         type_ = NUMBER_;                                                                                                                                                                               \
+//         number_value_ = static_cast<long double>(n);                                                                                                                                                   \
+//     }
+//     $number(char) $number(int) $number(long) $number(long long) $number(unsigned char) $number(unsigned int) $number(unsigned long) $number(unsigned long long) $number(float) $number(double)
+//         $number(long double)
+// #undef $number
 #if JSONXX_COMPILER_HAS_CXX11 > 0
-            void import(const std::nullptr_t &) {
+    void import(const std::nullptr_t &) {
         reset();
         type_ = NULL_;
     }
@@ -315,6 +326,44 @@ public:
     template <typename T> T &get();
     template <typename T> const T &get() const;
 
+    template <> inline bool is<Value>() const { return true; }
+
+    template <> inline bool is<Null>() const { return type_ == NULL_; }
+
+    template <> inline bool is<Boolean>() const { return type_ == BOOL_; }
+
+    template <> inline bool is<String>() const { return type_ == STRING_; }
+
+    template <> inline bool is<Number>() const { return type_ == NUMBER_; }
+
+    template <> inline bool is<Array>() const { return type_ == ARRAY_; }
+
+    template <> inline bool is<Object>() const { return type_ == OBJECT_; }
+    template <> inline const Boolean &get<Boolean>() const {
+        JSONXX_ASSERT(is<Boolean>());
+        return bool_value_;
+    }
+
+    template <> inline const String &get<String>() const {
+        JSONXX_ASSERT(is<String>());
+        return *string_value_;
+    }
+
+    template <> inline const Number &get<Number>() const {
+        JSONXX_ASSERT(is<Number>());
+        return number_value_;
+    }
+
+    template <> inline const Array &get<Array>() const {
+        JSONXX_ASSERT(is<Array>());
+        return *array_value_;
+    }
+
+    template <> inline const Object &get<Object>() const {
+        JSONXX_ASSERT(is<Object>());
+        return *object_value_;
+    }
+
     bool empty() const;
 
     Value duplicate() const;
@@ -332,7 +381,6 @@ public:
 protected:
     static bool parse(std::istream &input, Value &value);
 };
-
 template <typename T> bool Array::has(unsigned int i) const {
     if (i >= size()) {
         return false;
@@ -390,8 +438,8 @@ template <typename T> const T &Object::get(const std::string &key, const typenam
     }
 }
 const Value Object::get(const std::string &key) const {
-		JSONXX_ASSERT(has(key));
-		return *(value_map_.find(key)->second);
+    JSONXX_ASSERT(has(key));
+    return *(value_map_.find(key)->second);
 }
 
 void Object::erase(const std::string &key) {
@@ -406,20 +454,6 @@ void Object::erase(const std::string &key) {
         }
     }
 }
-
-template <> inline bool Value::is<Value>() const { return true; }
-
-template <> inline bool Value::is<Null>() const { return type_ == NULL_; }
-
-template <> inline bool Value::is<Boolean>() const { return type_ == BOOL_; }
-
-template <> inline bool Value::is<String>() const { return type_ == STRING_; }
-
-template <> inline bool Value::is<Number>() const { return type_ == NUMBER_; }
-
-template <> inline bool Value::is<Array>() const { return type_ == ARRAY_; }
-
-template <> inline bool Value::is<Object>() const { return type_ == OBJECT_; }
 
 template <> inline Value &Value::get<Value>() { return *this; }
 
@@ -450,33 +484,15 @@ template <> inline Object &Value::get<Object>() {
     return *object_value_;
 }
 
-template <> inline const Boolean &Value::get<Boolean>() const {
-    JSONXX_ASSERT(is<Boolean>());
-    return bool_value_;
-}
-
-template <> inline const String &Value::get<String>() const {
-    JSONXX_ASSERT(is<String>());
-    return *string_value_;
-}
-
-template <> inline const Number &Value::get<Number>() const {
-    JSONXX_ASSERT(is<Number>());
-    return number_value_;
-}
-
-template <> inline const Array &Value::get<Array>() const {
-    JSONXX_ASSERT(is<Array>());
-    return *array_value_;
-}
-
-template <> inline const Object &Value::get<Object>() const {
-    JSONXX_ASSERT(is<Object>());
-    return *object_value_;
-}
-
 template <typename T> inline Object &Object::operator<<(const T &value) {
     *this << Value(value);
+    return *this;
+}
+
+template <typename T>
+    requires std::convertible_to<T, Number>
+Object &Object::operator<<(const T &value) {
+    *this << Value(static_cast<Number>(value));
     return *this;
 }
 
@@ -511,3 +527,5 @@ inline std::string to_string(const jsonxx::Value &p) {
 }
 inline std::string to_string(const jsonxx::Value *p) { return to_string(*p); }
 } // namespace std
+
+#endif

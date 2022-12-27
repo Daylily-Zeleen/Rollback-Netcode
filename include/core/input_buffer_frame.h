@@ -9,8 +9,8 @@
  */
 #pragma once
 #include "interfaces/base/i_base.h"
+#include "interfaces/i_data.h"
 #include <interfaces/i_peer.h>
-#include <def.h>
 
 #include <map>
 
@@ -22,33 +22,31 @@ namespace rollback_netcode {
 
 struct InputBufferFrame {
 public:
-	struct PeerInput {
-		const SharedPtr<const IInput> input;
-		const bool predicted = false;
+    struct PeerInput {
+        SharedPtr<const IData> input;
+        bool predicted;
 
-		PeerInput(const SharedPtr<const IInput> &p_input, const bool p_predicted) :
-				input(p_input), predicted(p_predicted) {}
-	};
+        PeerInput(const SharedPtr<const IData> &p_input, const bool p_predicted) : input(p_input), predicted(p_predicted) {}
+    };
 
-	const Tick_t tick;
+    const Tick_t tick;
 
-	std::map<PeerId_t, PeerInput> peers_input;
+    std::map<PeerId_t, PeerInput> peers_input;
 
-	InputBufferFrame(Tick_t tick) :
-			tick(tick) {}
+    InputBufferFrame(const Tick_t tick) : tick(tick) {}
 
-	[[nodiscard]] SharedPtr<const IInput> get_peer_input(const PeerId_t p_peer_id) const;
+    [[nodiscard]] SharedPtr<const IData> get_peer_input(const PeerId_t p_peer_id) const;
 
-	[[nodiscard]] bool is_peer_input_predicated(const PeerId_t p_peer_id) const;
+    [[nodiscard]] bool is_peer_input_predicated(const PeerId_t p_peer_id) const;
 
-	void get_missing_peers(const std::map<PeerId_t, SharedPtr<IPeer>> &p_peers, std::vector<PeerId_t> &r_missing_peer_ids) const;
-	[[nodiscard]] std::vector<PeerId_t> get_missing_peers(const std::map<PeerId_t, SharedPtr<IPeer>> &p_peers) const;
+    void get_missing_peers(const std::map<PeerId_t, SharedPtr<IPeer>> &p_peers, std::vector<PeerId_t> &r_missing_peer_ids) const;
+    [[nodiscard]] std::vector<PeerId_t> get_missing_peers(const std::map<PeerId_t, SharedPtr<IPeer>> &p_peers) const;
 
-	void add_peer_input(const PeerId_t p_peer_id, const SharedPtr<const IInput> &p_input, const bool p_predict = false);
+    void add_peer_input(const PeerId_t p_peer_id, const SharedPtr<const IData> &p_input, const bool p_predict = false);
 
-	[[nodiscard]] bool is_complete(const std::map<PeerId_t, SharedPtr<IPeer>> &p_peers) const;
+    [[nodiscard]] bool is_complete(const std::map<PeerId_t, SharedPtr<IPeer>> &p_peers) const;
 
-	[[nodiscard]] JsonObj to_json_obj() const;
+    [[nodiscard]] JsonObj to_json_obj() const;
 };
 
 } // namespace rollback_netcode

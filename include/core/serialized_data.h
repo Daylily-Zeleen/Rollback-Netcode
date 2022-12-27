@@ -15,11 +15,11 @@
 
 namespace rollback_netcode {
 struct SerializedData {
-    const uint8_t *buffer;
-    uint16_t size;
+    char *buffer;
+    int64_t size;
 
-    SerializedData(const uint16_t &p_buffer_capacity = DEFAULT_BUFFER_CAPACITY) { buffer = memnew(uint8_t[p_buffer_capacity]); }
-    ~SerializedData() { memdelete(buffer); }
+    SerializedData(const int64_t &p_buffer_capacity = DEFAULT_BUFFER_CAPACITY) { buffer = MEMNEW(char[p_buffer_capacity]); }
+    ~SerializedData() { MEMDELETE(buffer); }
 };
 
 } // namespace rollback_netcode

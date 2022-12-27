@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#ifdef DEBUG
+#ifdef DEBUG_ENABLED
 #define ERR_THROW(cond, msg) \
     if (cond)                \
         throw msg;
@@ -17,24 +17,24 @@
 #define ERR_THROW(cond, msg)
 #endif
 
-#ifdef DEBUG
+#ifdef DEBUG_ENABLED
 #define WARNING(msg) throw msg;
 #else
 #define WARNING(msg)
 #endif
 
-#ifdef DEBUG 
+#ifdef DEBUG_ENABLED 
 #define HINT(msg) throw msg;
 #else
 #define HINT(msg)
 #endif
 
-#ifdef DEBUG 
+#ifdef DEBUG_ENABLED 
 #define PUSH_ERR(msg) throw msg;
 #else
 #define PUSH_ERR(msg)
 #endif
 
-#ifdef DEBUG
+#ifdef DEBUG_ENABLED
 
 #endif

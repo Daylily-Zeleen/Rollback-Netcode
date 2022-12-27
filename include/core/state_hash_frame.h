@@ -12,8 +12,6 @@
 
 #include "interfaces/base/i_base.h"
 #include <interfaces/i_peer.h>
-#include <interfaces/i_state.h>
-#include <def.h>
 
 #include <map>
 #include <memory>

@@ -15,7 +15,6 @@
 #include <interfaces/i_network_rollbackable.h>
 #include <core/message.h>
 #include <core/serialized_data.h>
-#include <def.h>
 #include <functional>
 
 
@@ -24,8 +23,8 @@ class INetworkAdaptor : virtual public IBase {
 public:
 	Event<std::function<void(const PeerId_t &p_peer_id, PingMessage &p_peer_msg)>> event_ping_received;
 	Event<std::function<void(const PeerId_t &p_peer_id, PingMessage &p_peer_msg)>> event_ping_back_received;
-	Event<std::function<void()>> event_start_remote_received;
-	Event<std::function<void()>> event_start_stop_received;
+	Event<std::function<void()>> event_remote_start_received;
+	Event<std::function<void()>> event_remote_stop_received;
 	Event<std::function<void(const PeerId_t &p_sender_peer_id, const SerializedData &p_serialized_data)>> event_input_tick_received;
 
 	virtual void attach_network_adaptor(const SharedPtr<IBase> &p_sync_manager) {}
@@ -40,7 +39,7 @@ public:
 	virtual void send_input_tick(const PeerId_t p_peer_id, const SerializedData &p_serialized_data) = 0;
 
 	virtual bool is_network_host() = 0;
-	virtual bool is_network_master_for_obj(const INetworkRollbackable p_object) = 0;
+	// virtual bool is_network_master_for_obj(const INetworkRollbackable p_object) = 0;
 
 	virtual SharedPtr<IPeer> get_network_peer() = 0;
 
